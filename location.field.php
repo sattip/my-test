@@ -163,7 +163,7 @@ class field_location extends SK_FormField
 				});
 				
 				$item_node.click(function(){
-					$node.val(item.name);
+					$node.val(item.suggest_label);
 					removeSuggest();
 					$node.focus();
 				});
@@ -324,7 +324,7 @@ class field_location extends SK_FormField
 					if (app_Location::isStateCityExists($value))
 					{
 						$show_items[]='city_id';
-						$assign['city_id'] = '<div class="city_name"><input type="text" autocomplete="off" name="city_name"></div>';
+						$assign['city_id'] = '<div><input type="text" autocomplete="off" name="city_name"></div>';
 					}
 					else {
 						$show_items[] = 'custom_location';
@@ -419,11 +419,13 @@ class field_location extends SK_FormField
 	private function render_prepare()
 	{
 		$value = $this->getValue();
-		
-		$country_id = (isset($value['country_id']) && strlen($value['country_id'])) ? $value['country_id'] : false;
+		$ip = $_SERVER['REMOTE_ADDR'];
+		$country_2char = app_Location::getCountryByIp($ip);
+		$country_id = (isset($value['country_id']) && strlen($value['country_id'])) ? $value['country_id'] : $country_2char;
 		$state_id = (isset($value['state_id']) && strlen($value['state_id'])) ? $value['state_id'] :false;
 		
 		$this->items['country_id']['display'] = true;
+		
 		if ($country_id) 
 		{
 			if (app_Location::isCountryZipExists( $country_id ) )
@@ -444,7 +446,7 @@ class field_location extends SK_FormField
 						$this->items['city_id']['display'] = true;
 					}
 					else{
-						$this->items['custom_location']['display'] = true;
+						$this->items['custom_location']['display'] = false;
 					}
 				} else {
 					
@@ -465,8 +467,9 @@ class field_location extends SK_FormField
 	private function renderField($field)
 	{
 		$value = $this->getValue();
-		
-		$country_id = (isset($value['country_id']) && strlen($value['country_id'])) ? $value['country_id'] : null;
+		$ip = $_SERVER['REMOTE_ADDR'];
+		$country_2char = app_Location::getCountryByIp($ip);
+		$country_id = (isset($value['country_id']) && strlen($value['country_id'])) ? $value['country_id'] : $country_2char;
 		$state_id = (isset($value['state_id']) && strlen($value['state_id'])) ? $value['state_id'] : null;
 		$city_id = (isset($value['city_id']) && strlen($value['city_id'])) ? $value['city_id'] : null;
 		
@@ -522,7 +525,7 @@ class field_location extends SK_FormField
 				
 			case 'city_id':
 				if ($country_id && $display=='') {
-					$output.='<div class="city_name"><input type="text" autocomplete="off" name="'.$this->getName().'[city_name]" value="'.$city_name.'"></div>';
+					$output.='<div><input type="text" autocomplete="off" name="'.$this->getName().'[city_name]" value="'.$city_name.'"></div>';
 				}
 				break;	
 				
