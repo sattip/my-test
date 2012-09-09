@@ -324,7 +324,7 @@ class field_location extends SK_FormField
 					if (app_Location::isStateCityExists($value))
 					{
 						$show_items[]='city_id';
-						$assign['city_id'] = '<div class="city_name"><input type="text" autocomplete="off" name="city_name"></div>';
+						$assign['city_id'] = '<div><input type="text" autocomplete="off" name="city_name"></div>';
 					}
 					else {
 						$show_items[] = 'custom_location';
@@ -522,7 +522,7 @@ class field_location extends SK_FormField
 				
 			case 'city_id':
 				if ($country_id && $display=='') {
-					$output.='<div class="city_name"><input type="text" autocomplete="off" name="'.$this->getName().'[city_name]" value="'.$city_name.'"></div>';
+					$output.='<div><input type="text" autocomplete="off" name="'.$this->getName().'[city_name]" value="'.$city_name.'"></div>';
 				}
 				break;	
 				
