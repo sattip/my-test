@@ -19,6 +19,22 @@ class app_Location
 		return MySQL::fetchArray( $_query );
 	}
 	
+	public static function getCountryname($country_code)
+	{
+		$_query = sql_placeholder( "SELECT `Country_str_name` FROM `".TBL_LOCATION_COUNTRY."` 
+			WHERE `Country_str_code`=? LIMIT 1", $country_code );
+		
+		return SK_MySQL::query($_query)->fetch_cell();
+	}
+	
+	public static function getStatename($country_code)
+	{
+		$_query = sql_placeholder( "SELECT `Admin1_str_name` FROM `".TBL_LOCATION_STATE."` 
+			WHERE `Admin1_str_code`=? LIMIT 1", $country_code );
+		
+		return SK_MySQL::query($_query)->fetch_cell();
+	}
+	
 	public static function Regions()
 	{
 		$_query = "SELECT * FROM `".TBL_LOCATION_REGION."`";
@@ -226,7 +242,7 @@ class app_Location
 		return MySQL::fetchArray( $_query);
 	}
 	
-	public static function getSaggestCities($str, $state_id)
+	public static function getSuggestCities($str, $state_id)
 	{
 		if (!strlen(trim($str)) || !strlen(trim($state_id))) {
 			return array();
@@ -243,6 +259,38 @@ class app_Location
 			preg_match('/'.$str.'/i',$item->name,$matches);
 			
 			$label = '<b>'.$matches[0].'</b>'.substr($item->name,strlen($matches[0]));
+			$out[] = array(
+					'id'=>$item->id,
+					'name'=>$label,
+					'suggest_label'=>$label
+				);
+		}
+		return $out;
+	}
+	
+	public static function getSaggestCities($str, $state_id)
+	{
+		if (!strlen(trim($str)) || !strlen(trim($state_id))) {
+			return array();
+		}
+		$ip = $_SERVER['REMOTE_ADDR'];
+		$country_2char = app_Location::getCountryByIp($ip);
+		
+		$query = SK_MySQL::placeholder('
+				SELECT `t`.`Feature_int_id` AS `id` , `t`.`Feature_str_name` AS `name` , `t`.`Admin1_str_code` AS `state_code` FROM  `' . TBL_LOCATION_CITY . '` AS `t`
+				WHERE `t`.`Country_str_code`="?"
+				AND `t`.`Feature_str_name` LIKE "?" LIMIT 0, 10'
+				, $country_2char,"$str%");
+		$result = SK_MySQL::query($query);
+		$out = array();
+		//$_item = $result->fetch_object();
+		$_res = app_Location::getCountryname($country_2char);
+		while ($item = $result->fetch_object()){
+			preg_match('/'.$str.'/i',$item->name,$matches);
+			$state_code = $item->state_code;
+		   $state_name = app_Location::getStatename($state_code);
+			//$country_name = print_r($_res);
+			$label = '<b>'.$matches[0].'</b>'.substr($item->name,strlen($matches[0])).', '.$state_name.', '.$_res;  
 			$out[] = array(
 					'id'=>$item->id,
 					'name'=>$item->name,
@@ -305,6 +353,8 @@ class app_Location
 		return SK_MySQL::query($query)->fetch_cell();	
 		
 	}
+	
+	
 
 	public static function getDistance( $fromId, $toId )
     {
