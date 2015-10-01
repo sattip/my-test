@@ -7,6 +7,7 @@
  * @version 5.0
  * @since 5.0
  * @link http://www.skadate.com/
+ * @author panosbobos
  */
 
 class app_Location
